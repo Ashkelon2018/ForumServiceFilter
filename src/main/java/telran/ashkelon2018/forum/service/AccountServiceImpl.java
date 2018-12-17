@@ -13,6 +13,7 @@ import telran.ashkelon2018.forum.dao.UserAccountRepository;
 import telran.ashkelon2018.forum.domain.UserAccount;
 import telran.ashkelon2018.forum.dto.UserProfileDto;
 import telran.ashkelon2018.forum.dto.UserRegDto;
+import telran.ashkelon2018.forum.exceptions.ForbiddenException;
 import telran.ashkelon2018.forum.exceptions.UserConflictException;
 
 @Service
@@ -57,9 +58,16 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	public UserProfileDto removeUser(String login, 
-			String token) {
-		// FIXME
+	public UserProfileDto removeUser(String login, String token) {
+		AccountUserCredentials credentials = accountConfiguration.tokenDecode(token);
+		UserAccount user = userRepository.findById(credentials.getLogin()).get();
+		Set<String> roles = user.getRoles();
+		boolean hasRight = roles.stream()
+				.anyMatch(s -> "Admin".equals(s) || "Moderator".equals(s));
+		hasRight = hasRight || credentials.getLogin().equals(login);
+		if(!hasRight) {
+			throw new ForbiddenException();
+		}
 		UserAccount userAccount = userRepository.findById(login).orElse(null);
 		if (userAccount != null) {
 			userRepository.delete(userAccount);
@@ -69,7 +77,6 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public Set<String> addRole(String login, String role, String token) {
-		// FIXME
 		UserAccount userAccount = userRepository.findById(login).orElse(null);
 		if (userAccount != null) {
 			userAccount.addRole(role);
@@ -82,7 +89,6 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public Set<String> removeRole(String login, String role, String token) {
-		// FIXME
 		UserAccount userAccount = userRepository.findById(login).orElse(null);
 		if (userAccount != null) {
 			userAccount.removeRole(role);

@@ -1,7 +1,6 @@
 package telran.ashkelon2018.forum.service.filter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -23,13 +22,12 @@ import telran.ashkelon2018.forum.domain.UserAccount;
 
 @Service
 @Order(2)
-public class ExpDateFilter implements Filter {
+public class RolesFilter implements Filter {
 	@Autowired
 	UserAccountRepository repository;
 
 	@Autowired
 	AccountConfiguration configuration;
-
 	
 
 	@Override
@@ -39,16 +37,16 @@ public class ExpDateFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;
 		String path = request.getServletPath();
 		String token = request.getHeader("Authorization");
-		if (!path.startsWith("/account/password") && token != null) {
+		if (path.startsWith("/account/role/")) {
 			AccountUserCredentials userCredentials = configuration.tokenDecode(token);
 			UserAccount userAccount = repository.findById(userCredentials.getLogin()).orElse(null);
-			
-			if (userAccount != null && userAccount.getExpdate().isBefore(LocalDateTime.now())) {
-				response.sendError(403,"Password expired");
+			if (!userAccount.getRoles().contains("Admin")) {
+				response.sendError(403,"Access denied");
 				return;
 			}
 		}
 		chain.doFilter(request, response);
+
 	}
 	
 	@Override

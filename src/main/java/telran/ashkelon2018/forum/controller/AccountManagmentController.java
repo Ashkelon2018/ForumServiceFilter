@@ -46,14 +46,14 @@ public class AccountManagmentController {
 		return accountService.removeUser(login, token);
 	}
 	
-	@PutMapping("/{login}/{role}")
+	@PutMapping("/role/{login}/{role}")
 	public Set<String> addRole(@PathVariable String login, 
 			@PathVariable String role, 
 			@RequestHeader("Authorization") String token){
 		return accountService.addRole(login, role, token);
 	}
 
-	@DeleteMapping("/{login}/{role}")
+	@DeleteMapping("/role/{login}/{role}")
 	public Set<String> removeRole(@PathVariable String login, 
 			@PathVariable String role, 
 			@RequestHeader("Authorization") String token){
