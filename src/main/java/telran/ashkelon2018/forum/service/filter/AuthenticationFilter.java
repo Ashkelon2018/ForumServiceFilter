@@ -1,6 +1,7 @@
 package telran.ashkelon2018.forum.service.filter;
 
 import java.io.IOException;
+import java.security.Principal;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -9,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mindrot.jbcrypt.BCrypt;
@@ -40,6 +42,7 @@ public class AuthenticationFilter implements Filter {
 		String method = request.getMethod();
 		boolean filter1 = path.startsWith("/account") && !"POST".equals(method);
 		boolean filter2 = path.startsWith("/forum") && !path.startsWith("/forum/posts");
+		
 		if (filter1 || filter2) {
 			String token = request.getHeader("Authorization");
 			if (token == null) {
@@ -63,7 +66,8 @@ public class AuthenticationFilter implements Filter {
 					return;
 				}
 			}
-
+			chain.doFilter(new WrapperRequest(request, userAccount.getLogin()), response);
+			return;
 		}
 		chain.doFilter(request, response);
 	}
@@ -74,6 +78,26 @@ public class AuthenticationFilter implements Filter {
 
 	@Override
 	public void destroy() {
+	}
+	
+	private class WrapperRequest extends HttpServletRequestWrapper{
+		String user;
+		public WrapperRequest(HttpServletRequest request, String user) {
+			super(request);
+			this.user = user;
+		}
+		
+		@Override
+		public Principal getUserPrincipal() {
+			return new Principal() {
+				
+				@Override
+				public String getName() {
+					
+					return user;
+				}
+			};
+		}
 	}
 
 }

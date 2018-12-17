@@ -1,6 +1,9 @@
 package telran.ashkelon2018.forum.controller;
 
+import java.security.Principal;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,6 +42,7 @@ public class ForumController {
 	@DeleteMapping("/post/{id}")
 	public Post removePost(@PathVariable String id, @RequestHeader("Authorization")
 			String token) {
+		
 		return service.removePost(id, token);
 	}
 
@@ -49,7 +53,8 @@ public class ForumController {
 	}
 
 	@PutMapping("/post/{id}/like")
-	public boolean addLike(@PathVariable String id) {
+	public boolean addLike(@PathVariable String id, HttpServletRequest request) {
+		System.out.println(request.getUserPrincipal().getName());
 		return service.addLike(id);
 	}
 

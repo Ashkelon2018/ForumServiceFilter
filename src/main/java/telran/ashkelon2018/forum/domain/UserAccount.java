@@ -20,7 +20,7 @@ import lombok.Singular;
 @Setter
 @Builder
 @EqualsAndHashCode(of = { "login" })
-@Document(collection = "forum_users")
+@Document(collection = "users_account")
 public class UserAccount {
 	@Id
 	String login;
